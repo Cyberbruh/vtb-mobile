@@ -1,10 +1,12 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { MainContext } from "./context";
 
 const MarketStack = createNativeStackNavigator();
 
 class CompanyComponent extends React.Component {
+    static contextType = MainContext;
     render() {
         return (
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
@@ -14,16 +16,27 @@ class CompanyComponent extends React.Component {
     }
 }
 class MarketComponent extends React.Component {
+    static contextType = MainContext;
+    componentDidMount() {}
+
     render() {
-        return (
+        let view;
+        const companies = this.context.companies.map((company, index) => (
+            <View key={index} style={styles.company}>
+                <Text>{company.name}</Text>
+            </View>
+        ));
+        view = (
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-                <Text>market</Text>
+                {companies}
             </View>
         );
+        return view;
     }
 }
 
 class MarketScreen extends React.Component {
+    static contextType = MainContext;
     render() {
         return (
             <MarketStack.Navigator
@@ -45,6 +58,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
     },
+    company: {},
 });
 
 export default MarketScreen;

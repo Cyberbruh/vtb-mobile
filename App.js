@@ -13,12 +13,20 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { SvgUri } from "react-native-svg";
 import { Picker } from "@react-native-picker/picker";
+import { getHeaderTitle } from "@react-navigation/elements";
+import { Header } from "react-native-elements";
 
 import Loading from "./components/loading";
 import MarketScreen from "./components/market";
 import NewsScreen from "./components/news";
+import Balance from "./components/balance";
+
+import Config from "./config.js";
+
+import IconMarket from "./assets/market.svg";
+import IconNews from "./assets/news.svg";
+import { MainContext } from "./components/context";
 
 const Tab = createBottomTabNavigator();
 
@@ -31,22 +39,40 @@ const DismissKeyboard = ({ children }) => (
 class App extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { status: 1, exp: 0 };
+        this.state = { status: 1, exp: 0, api_token: 0, money: 0, companies: [] };
     }
 
     componentDidMount() {
         (async () => {
             try {
                 const value = JSON.parse(await AsyncStorage.getItem("@api_token"));
-                if (value === null) {
+                const money = JSON.parse(await AsyncStorage.getItem("@money"));
+                if (value === null || money === null) {
                     this.setState({
                         status: 2,
                     });
                 } else {
-                    this.setState({
-                        status: 3,
-                        api_token: value,
+                    const response = await fetch(Config.host + "api/companies", {
+                        method: "GET",
+                        headers: {
+                            Accept: "application/json",
+                            "Content-Type": "application/json",
+                            Authorization: "Bearer " + value,
+                        },
                     });
+                    if (response.status != 200)
+                        this.setState({
+                            status: 2,
+                        });
+                    else {
+                        const companies = await response.json();
+                        this.setState({
+                            status: 3,
+                            api_token: value,
+                            money: money,
+                            companies: companies,
+                        });
+                    }
                 }
             } catch (e) {
                 console.error(e);
@@ -60,28 +86,25 @@ class App extends React.Component {
                 this.setState((prevState) => ({
                     status: 1,
                 }));
-                let token = 123123123;
-                // const response = await fetch(
-                //     "https://mywebsite.com/endpoint/",
-                //     {
-                //         method: "POST",
-                //         headers: {
-                //             Accept: "application/json",
-                //             "Content-Type": "application/json",
-                //             Authorization: "Bearer " + this.api_token,
-                //         },
-                //         body: JSON.stringify({
-                //             age: "123",
-                //             experience: "1",
-                //             blueprint: "123",
-                //         }),
-                //     }
-                // );
-                // const json = await response.json();
-                // token = json.token;
-                await AsyncStorage.setItem("@api_token", JSON.stringify(token));
+                const response = await fetch(Config.host + "api/register", {
+                    method: "POST",
+                    headers: {
+                        Accept: "application/json",
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        age: this.state.age,
+                        experience: this.state.exp,
+                        blueprint: Math.random(),
+                    }),
+                });
+                if (response.status != 200) return;
+                const json = await response.json();
+                await AsyncStorage.setItem("@api_token", JSON.stringify(json.token));
+                await AsyncStorage.setItem("@money", JSON.stringify(0));
                 this.setState((prevState) => ({
                     status: 3,
+                    api_token: json.token,
                 }));
             } catch (e) {
                 console.error(e);
@@ -99,6 +122,21 @@ class App extends React.Component {
         this.setState(() => ({
             exp: itemValue,
         }));
+    };
+
+    changeMoney = (value) => {
+        this.setState((prev) => ({
+            money: prev.money + value,
+        }));
+    };
+
+    changeRates = (changes) => {
+        let companies = this.state.companies;
+        for (let i of changes) {
+            for (let j of companies) {
+                if (j.id == i.company_id) j.rate *= changes;
+            }
+        }
     };
 
     render() {
@@ -140,36 +178,54 @@ class App extends React.Component {
             );
         } else {
             view = (
-                <NavigationContainer>
-                    <Tab.Navigator
-                        screenOptions={({ route }) => ({
-                            tabBarIcon: ({ focused, color, size }) => {
-                                if (route.name === "News") {
+                <MainContext.Provider
+                    value={{
+                        api_token: this.state.api_token,
+                        companies: this.state.companies,
+                        money: this.state.money,
+                        changeMoney: this.changeMoney,
+                        changeRates: this.changeRates,
+                    }}
+                >
+                    <NavigationContainer>
+                        <Tab.Navigator
+                            screenOptions={({ route }) => ({
+                                tabBarIcon: () => {
+                                    if (route.name === "news") {
+                                        return <IconNews width="100%" height="100%" />;
+                                    } else if (route.name === "market") {
+                                        return <IconMarket width="100%" height="100%" />;
+                                    }
+                                },
+                                tabBarInactiveTintColor: "gray",
+                                tabBarActiveTintColor: "tomato",
+                                header: ({ navigation, route, options }) => {
+                                    const title = getHeaderTitle(options, route.name);
                                     return (
-                                        <SvgUri
-                                            width="100%"
-                                            height="100%"
-                                            uri="https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/debian.svg"
+                                        <Header
+                                            centerComponent={{
+                                                text: title,
+                                                style: { color: "#fff" },
+                                            }}
+                                            rightComponent={<Balance money={this.state.money} />}
                                         />
                                     );
-                                } else if (route.name === "Market") {
-                                    return (
-                                        <SvgUri
-                                            width="100%"
-                                            height="100%"
-                                            uri="https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/debian.svg"
-                                        />
-                                    );
-                                }
-                            },
-                            tabBarInactiveTintColor: "gray",
-                            tabBarActiveTintColor: "tomato",
-                        })}
-                    >
-                        <Tab.Screen name="News" component={NewsScreen} />
-                        <Tab.Screen name="Market" component={MarketScreen} />
-                    </Tab.Navigator>
-                </NavigationContainer>
+                                },
+                            })}
+                        >
+                            <Tab.Screen
+                                name="news"
+                                component={NewsScreen}
+                                options={{ title: "Новости" }}
+                            />
+                            <Tab.Screen
+                                name="market"
+                                component={MarketScreen}
+                                options={{ title: "Маркет" }}
+                            />
+                        </Tab.Navigator>
+                    </NavigationContainer>
+                </MainContext.Provider>
             );
         }
         return view;
