@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import * as React from "react";
+import React from "react";
 import {
     StyleSheet,
     Text,
@@ -12,7 +12,6 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Picker } from "@react-native-picker/picker";
 import { getHeaderTitle } from "@react-navigation/elements";
 import { Header } from "react-native-elements";
@@ -30,12 +29,6 @@ import { MainContext } from "./components/context";
 
 const Tab = createBottomTabNavigator();
 
-const DismissKeyboard = ({ children }) => (
-    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-        {children}
-    </TouchableWithoutFeedback>
-);
-
 class App extends React.Component {
     constructor(props) {
         super(props);
@@ -45,19 +38,19 @@ class App extends React.Component {
     componentDidMount() {
         (async () => {
             try {
-                const value = JSON.parse(await AsyncStorage.getItem("@api_token"));
-                const money = JSON.parse(await AsyncStorage.getItem("@money"));
-                if (value === null || money === null) {
+                const jsonValue = await AsyncStorage.getItem("@mem");
+                if (jsonValue === null) {
                     this.setState({
                         status: 2,
                     });
                 } else {
+                    value = JSON.parse(jsonValue);
                     const response = await fetch(Config.host + "api/companies", {
                         method: "GET",
                         headers: {
                             Accept: "application/json",
                             "Content-Type": "application/json",
-                            Authorization: "Bearer " + value,
+                            Authorization: "Bearer " + value.api_token,
                         },
                     });
                     if (response.status == 401)
@@ -69,11 +62,21 @@ class App extends React.Component {
                             status: 1,
                         });
                     else {
-                        const companies = await response.json();
+                        let companies = await response.json();
+                        for (let i of companies) {
+                            i.stock = 0;
+                        }
+                        for (let i of companies) {
+                            if (value.companies) {
+                                for (let j of value.companies) {
+                                    if (i.id == j.id) i.stock = j.stock;
+                                }
+                            }
+                        }
                         this.setState({
                             status: 3,
-                            api_token: value,
-                            money: money,
+                            api_token: value.api_token,
+                            money: value.money,
                             companies: companies,
                         });
                     }
@@ -87,7 +90,7 @@ class App extends React.Component {
     handleStart = () => {
         (async () => {
             try {
-                this.setState((prevState) => ({
+                this.setState(() => ({
                     status: 1,
                 }));
                 const response = await fetch(Config.host + "api/register", {
@@ -104,12 +107,14 @@ class App extends React.Component {
                 });
                 if (response.status != 200) return;
                 const json = await response.json();
-                await AsyncStorage.setItem("@api_token", JSON.stringify(json.token));
-                await AsyncStorage.setItem("@money", JSON.stringify(0));
-                this.setState((prevState) => ({
-                    status: 3,
-                    api_token: json.token,
-                }));
+                await AsyncStorage.setItem(
+                    "@mem",
+                    JSON.stringify({
+                        api_token: json.token,
+                        money: 3500,
+                    })
+                );
+                this.componentDidMount();
             } catch (e) {
                 console.error(e);
             }
@@ -128,19 +133,44 @@ class App extends React.Component {
         }));
     };
 
-    changeMoney = (value) => {
-        this.setState((prev) => ({
-            money: prev.money + value,
+    changeStock = (id, count) => {
+        let temp = this.state.companies,
+            money = this.state.money;
+        for (let i of temp)
+            if (i.id == id) {
+                i.stock = parseInt(i.stock) + parseInt(count);
+                money -= parseFloat(i.rate) * parseInt(count);
+            }
+        this.setState(() => ({
+            companies: temp,
+            money: money,
         }));
+        (async () => {
+            try {
+                await AsyncStorage.setItem(
+                    "@mem",
+                    JSON.stringify({
+                        api_token: this.state.api_token,
+                        money: this.state.money,
+                        companies: this.state.companies,
+                    })
+                );
+            } catch (e) {
+                console.error(e);
+            }
+        })();
     };
 
     changeRates = (changes) => {
         let companies = this.state.companies;
         for (let i of changes) {
             for (let j of companies) {
-                if (j.id == i.company_id) j.rate *= changes;
+                if (j.id == i.company_id) j.rate *= i.change;
             }
         }
+        this.setState(() => ({
+            companies: companies,
+        }));
     };
 
     render() {
@@ -149,7 +179,7 @@ class App extends React.Component {
             view = <Loading></Loading>;
         } else if (this.state.status == 2) {
             view = (
-                <DismissKeyboard>
+                <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
                     <View style={styles.container}>
                         <View style={styles.block1}>
                             <Text>Введите ваш возраст:</Text>
@@ -178,7 +208,7 @@ class App extends React.Component {
                         />
                         <StatusBar style="auto" />
                     </View>
-                </DismissKeyboard>
+                </TouchableWithoutFeedback>
             );
         } else {
             view = (
@@ -187,7 +217,7 @@ class App extends React.Component {
                         api_token: this.state.api_token,
                         companies: this.state.companies,
                         money: this.state.money,
-                        changeMoney: this.changeMoney,
+                        changeStock: this.changeStock,
                         changeRates: this.changeRates,
                     }}
                 >

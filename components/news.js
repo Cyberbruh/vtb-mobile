@@ -48,13 +48,11 @@ class NewsScreen extends React.Component {
 
     componentDidMount() {
         this.generateNew();
-        this.setState(() => ({ interval: setInterval(this.generateNew, Config.time) }));
+        this.interval = setInterval(this.generateNew, 2 * Config.time);
     }
 
     componentWillUnmount() {
-        this.setState(() => ({
-            interval: null,
-        }));
+        clearInterval(this.interval);
     }
 
     render() {
@@ -85,9 +83,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingHorizontal: 20,
-    },
-    scrollView: {
-        //backgroundColor: "pink",
     },
     event: {
         backgroundColor: "lightblue",
