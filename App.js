@@ -8,6 +8,7 @@ import {
     TextInput,
     Keyboard,
     TouchableWithoutFeedback,
+    Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NavigationContainer } from "@react-navigation/native";
@@ -45,6 +46,7 @@ class App extends React.Component {
     componentDidMount() {
         (async () => {
             try {
+                //await AsyncStorage.removeItem("@mem");
                 const jsonValue = await AsyncStorage.getItem("@mem");
                 if (jsonValue === null) {
                     this.setState({
@@ -90,7 +92,6 @@ class App extends React.Component {
                 }
             } catch (e) {
                 console.error(e);
-                console.error(112312323123);
             }
         })();
     }
@@ -122,10 +123,14 @@ class App extends React.Component {
                         money: 3500,
                     })
                 );
+                Alert.alert(
+                    "Обучение",
+                    "На странице новостей вы можете увидеть происходящие в мире события, они появляются каждые 10 секунд, после появления события у вас есть 10 секунд до обновления курса акций, вы должны предугадать куда сдвинется курс и у каких компаний. Рекомендуем сначала изучить компании.",
+                    [{ text: "OK" }]
+                );
                 this.componentDidMount();
             } catch (e) {
                 console.error(e);
-                console.error(1223233123);
             }
         })();
     };
@@ -166,7 +171,6 @@ class App extends React.Component {
                     })
                 );
             } catch (e) {
-                console.error(123123);
                 console.error(e);
             }
         })();
@@ -180,7 +184,7 @@ class App extends React.Component {
             }
         }
         for (let i of companies) {
-            i.rate *= 0.95 + 0.15*Math.random();
+            i.rate *= 0.95 + 0.15 * Math.random();
         }
         this.setState(() => ({
             companies: companies,
@@ -216,9 +220,8 @@ class App extends React.Component {
                                 onValueChange={this.onChangeExp}
                             >
                                 <Picker.Item label="Нет, никогда не пробовал" value="0" />
-                                <Picker.Item label="Нет, но хотел бы попробовать" value="1" />
-                                <Picker.Item label="Да, но я ничего не понял" value="2" />
-                                <Picker.Item label="У меня уже есть опыт" value="3" />
+                                <Picker.Item label="Есть минимальный опыт" value="1" />
+                                <Picker.Item label="У меня большой опыт" value="2" />
                             </Picker>
                         </View>
                         <Button

@@ -1,5 +1,14 @@
 import React from "react";
-import { StyleSheet, Text, View, Image, SafeAreaView, ScrollView } from "react-native";
+import {
+    StyleSheet,
+    Text,
+    View,
+    Image,
+    SafeAreaView,
+    ScrollView,
+    Alert,
+    Linking,
+} from "react-native";
 import Config from "../config.js";
 import Loading from "./loading";
 import { MainContext } from "./context";
@@ -23,6 +32,16 @@ class NewsScreen extends React.Component {
     }
 
     generateNew = () => {
+        if (this.state.events.length > 0 && this.state.events.length % 7 == 0) {
+            Alert.alert(
+                "У вас отлично получается!",
+                "Доверьте ваши финансы умным продуктам банка ВТБ, чтобы быть уверенным в их сохранности.",
+                [
+                    { text: "Перейти", onPress: () => Linking.openURL("https://www.vtb.ru/") },
+                    { text: "Остаться" },
+                ]
+            );
+        }
         (async () => {
             try {
                 const response = await fetch(Config.host + "api/event/generate", {
@@ -40,10 +59,19 @@ class NewsScreen extends React.Component {
                     status: 2,
                 }));
                 setTimeout(this.context.changeRates, Config.time, json.changes);
+                setTimeout(this.makeVisible, Config.time);
             } catch (e) {
                 console.error(e);
             }
         })();
+    };
+
+    makeVisible = () => {
+        let temp = this.state.events;
+        for (let i of temp) i.visible = true;
+        this.setState((prevState) => ({
+            events: temp,
+        }));
     };
 
     componentDidMount() {
@@ -66,11 +94,13 @@ class NewsScreen extends React.Component {
                     <View style={styles.textblock}>
                         <Text style={styles.event_title}>{event.title}</Text>
                         <Text style={styles.event_text}>{event.text}</Text>
+                        <Text style={styles.event_text}>{event.visible ? event.solution : ""}</Text>
                     </View>
                 </View>
             ));
             view = (
                 <SafeAreaView style={styles.container}>
+                    <Text style={styles.helper}>Новости будут появляться отсюда</Text>
                     <ScrollView style={styles.scrollView}>{events}</ScrollView>
                 </SafeAreaView>
             );
@@ -80,6 +110,10 @@ class NewsScreen extends React.Component {
 }
 
 const styles = StyleSheet.create({
+    helper: {
+        textAlign: "center",
+        color: "grey",
+    },
     container: {
         flex: 1,
     },
