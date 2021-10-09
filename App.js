@@ -179,6 +179,9 @@ class App extends React.Component {
                 if (j.id == i.company_id) j.rate *= i.change;
             }
         }
+        for (let i of companies) {
+            i.rate *= 0.95 + 0.15*Math.random();
+        }
         this.setState(() => ({
             companies: companies,
             key: Math.random(),
