@@ -60,9 +60,13 @@ class App extends React.Component {
                             Authorization: "Bearer " + value,
                         },
                     });
-                    if (response.status != 200)
+                    if (response.status == 401)
                         this.setState({
                             status: 2,
+                        });
+                    else if (response.status != 200)
+                        this.setState({
+                            status: 1,
                         });
                     else {
                         const companies = await response.json();

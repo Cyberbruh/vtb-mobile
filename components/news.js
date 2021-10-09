@@ -89,9 +89,6 @@ const styles = StyleSheet.create({
     scrollView: {
         //backgroundColor: "pink",
     },
-    text: {
-        fontSize: 42,
-    },
     event: {
         backgroundColor: "lightblue",
         borderRadius: 5,
