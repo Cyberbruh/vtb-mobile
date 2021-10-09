@@ -36,7 +36,7 @@ class NewsScreen extends React.Component {
                 if (response.status != 200) return;
                 const json = await response.json();
                 this.setState((prevState) => ({
-                    events: [...prevState.events, json],
+                    events: [json, ...prevState.events],
                     status: 2,
                 }));
                 setTimeout(this.context.changeRates, Config.time, json.changes);
@@ -82,6 +82,8 @@ class NewsScreen extends React.Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    scrollView: {
         paddingHorizontal: 20,
     },
     event: {

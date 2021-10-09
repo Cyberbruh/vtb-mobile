@@ -9,11 +9,11 @@ import {
     TouchableOpacity,
     Button,
     TouchableWithoutFeedback,
-    TextInput,
     Keyboard,
     Alert,
 } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Slider } from "react-native-elements";
 import { MainContext } from "./context";
 
 const MarketStack = createNativeStackNavigator();
@@ -26,33 +26,31 @@ class CompanyComponent extends React.Component {
         this.state = { company: this.props.route.params.company, stockCount: 0 };
     }
 
-    checkStockBuy = () => {
-        if (
-            this.state.stockCount * this.state.company.rate > this.context.money ||
-            this.state.stockCount == 0
-        ) {
-            Alert.alert("У вас не хватает денег!", "Проверьте правильность ввода", [
-                { text: "OK" },
-            ]);
+    checkStock = () => {
+        if (this.state.stockCount == 0) {
+            Alert.alert("Выбрано 0 акций!", "Нужно хоть сколько-то", [{ text: "OK" }]);
             return;
+        }
+        if (this.state.stockCount < 0) {
+            if (this.state.stockCount > this.state.company.stock) {
+                Alert.alert("У вас не хватает акций!", "Проверьте правильность ввода", [
+                    { text: "OK" },
+                ]);
+                return;
+            }
+        } else {
+            if (this.state.stockCount * this.state.company.rate > this.context.money) {
+                Alert.alert("У вас не хватает денег!", "Проверьте правильность ввода", [
+                    { text: "OK" },
+                ]);
+                return;
+            }
         }
         this.setState(() => ({
             stockCount: 0,
+            key: Math.random(),
         }));
         this.context.changeStock(this.state.company.id, this.state.stockCount);
-    };
-
-    checkStockSell = () => {
-        if (this.state.stockCount > this.state.company.stock || this.state.stockCount == 0) {
-            Alert.alert("У вас не хватает акций!", "Проверьте правильность ввода", [
-                { text: "OK" },
-            ]);
-            return;
-        }
-        this.setState(() => ({
-            stockCount: 0,
-        }));
-        this.context.changeStock(this.state.company.id, -this.state.stockCount);
     };
 
     onChangeStock = (count) => {
@@ -85,25 +83,30 @@ class CompanyComponent extends React.Component {
                         <Text style={companyStyles.inputLabel}>
                             Введите количество акций для продажи/покупки
                         </Text>
-                        <TextInput
-                            style={companyStyles.input}
-                            value={this.state.stockCount.toString()}
-                            onChangeText={this.onChangeStock}
-                            placeholder="количество"
-                            keyboardType="numeric"
+                        <Slider
+                            key={this.context.key}
+                            style={companyStyles.slider}
+                            value={this.state.stockCount}
+                            onValueChange={this.onChangeStock}
+                            maximumValue={Math.round(this.context.money / this.state.company.rate)}
+                            minimumValue={-this.state.company.stock}
+                            step={1}
+                            trackStyle={{
+                                height: 10,
+                                backgroundColor: "transparent",
+                            }}
+                            thumbStyle={{ height: 25, width: 25, backgroundColor: "lightblue" }}
                         />
+                        <Text style={companyStyles.inputLabel}>
+                            {this.state.stockCount >= 0 ? "Купить " : "Продать "}
+                            {Math.abs(this.state.stockCount)} акций
+                        </Text>
                     </View>
                     <View style={companyStyles.buttons}>
                         <Button
                             style={companyStyles.button}
-                            onPress={this.checkStockBuy}
-                            title="Купить"
-                            color="#841584"
-                        />
-                        <Button
-                            style={companyStyles.button}
-                            onPress={this.checkStockSell}
-                            title="Продать"
+                            onPress={this.checkStock}
+                            title="Провести сделку"
                             color="#841584"
                         />
                     </View>
@@ -167,27 +170,22 @@ const companyStyles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         flex: 1,
-        //backgroundColor: "black",
     },
-    input: {
-        height: 40,
-        width: "50%",
-        margin: 12,
-        borderWidth: 1,
-        padding: 10,
-        textAlign: "center",
+    slider: {
+        width: "75%",
+        marginTop: 20,
     },
     buttons: {
         flexDirection: "row",
         padding: 20,
-        justifyContent: "space-between",
+        justifyContent: "center",
+        alignItems: "center",
         marginBottom: 20,
     },
     wrapper: {
         justifyContent: "center",
         alignItems: "center",
         flex: 1,
-        //backgroundColor: "black",
     },
     container: {
         flex: 1,
@@ -222,9 +220,10 @@ const companyStyles = StyleSheet.create({
 const marketStyles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    scrollView: {
         paddingHorizontal: 20,
     },
-    scrollView: {},
     company: {
         flexDirection: "row",
         backgroundColor: "lightblue",
@@ -258,10 +257,10 @@ const marketStyles = StyleSheet.create({
         paddingHorizontal: 15,
     },
     name: {
-        fontSize: 22,
+        fontSize: 18,
     },
     rate: {
-        fontSize: 20,
+        fontSize: 18,
     },
 });
 

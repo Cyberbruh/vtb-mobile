@@ -32,7 +32,14 @@ const Tab = createBottomTabNavigator();
 class App extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { status: 1, exp: 0, api_token: 0, money: 0, companies: [] };
+        this.state = {
+            status: 1,
+            exp: 0,
+            api_token: 0,
+            money: 0,
+            companies: [],
+            key: Math.random(),
+        };
     }
 
     componentDidMount() {
@@ -44,7 +51,7 @@ class App extends React.Component {
                         status: 2,
                     });
                 } else {
-                    value = JSON.parse(jsonValue);
+                    let value = JSON.parse(jsonValue);
                     const response = await fetch(Config.host + "api/companies", {
                         method: "GET",
                         headers: {
@@ -83,6 +90,7 @@ class App extends React.Component {
                 }
             } catch (e) {
                 console.error(e);
+                console.error(112312323123);
             }
         })();
     }
@@ -117,6 +125,7 @@ class App extends React.Component {
                 this.componentDidMount();
             } catch (e) {
                 console.error(e);
+                console.error(1223233123);
             }
         })();
     };
@@ -144,6 +153,7 @@ class App extends React.Component {
         this.setState(() => ({
             companies: temp,
             money: money,
+            key: Math.random(),
         }));
         (async () => {
             try {
@@ -156,6 +166,7 @@ class App extends React.Component {
                     })
                 );
             } catch (e) {
+                console.error(123123);
                 console.error(e);
             }
         })();
@@ -170,6 +181,7 @@ class App extends React.Component {
         }
         this.setState(() => ({
             companies: companies,
+            key: Math.random(),
         }));
     };
 
@@ -181,7 +193,7 @@ class App extends React.Component {
             view = (
                 <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
                     <View style={styles.container}>
-                        <View style={styles.block1}>
+                        <View style={styles.blockAge}>
                             <Text>Введите ваш возраст:</Text>
                             <TextInput
                                 style={styles.input}
@@ -191,9 +203,15 @@ class App extends React.Component {
                                 onSubmitEditing={Keyboard.dismiss}
                             />
                         </View>
-                        <View style={styles.block2}>
-                            <Text>Вы когда-нибудь пробовали инвестировать?{this.exp}</Text>
-                            <Picker selectedValue={this.state.exp} onValueChange={this.onChangeExp}>
+                        <View style={styles.blockPicker}>
+                            <Text style={styles.pickerText}>
+                                Вы когда-нибудь пробовали инвестировать?{this.exp}
+                            </Text>
+                            <Picker
+                                style={styles.picker}
+                                selectedValue={this.state.exp}
+                                onValueChange={this.onChangeExp}
+                            >
                                 <Picker.Item label="Нет, никогда не пробовал" value="0" />
                                 <Picker.Item label="Нет, но хотел бы попробовать" value="1" />
                                 <Picker.Item label="Да, но я ничего не понял" value="2" />
@@ -203,7 +221,7 @@ class App extends React.Component {
                         <Button
                             onPress={this.handleStart}
                             title="Начать"
-                            color="#841584"
+                            color="#3A83F1"
                             accessibilityLabel="Начать играть"
                         />
                         <StatusBar style="auto" />
@@ -219,6 +237,7 @@ class App extends React.Component {
                         money: this.state.money,
                         changeStock: this.changeStock,
                         changeRates: this.changeRates,
+                        key: this.state.key,
                     }}
                 >
                     <NavigationContainer>
@@ -267,6 +286,9 @@ class App extends React.Component {
 }
 
 const styles = StyleSheet.create({
+    picker: {
+        marginVertical: 20,
+    },
     container: {
         flex: 1,
         backgroundColor: "#fff",
@@ -279,9 +301,13 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         padding: 10,
     },
-    block1: {
+    blockAge: {
         alignItems: "center",
         flexDirection: "row",
+        marginVertical: 20,
+    },
+    blockPicker: {
+        marginVertical: 20,
     },
 });
 
