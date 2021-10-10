@@ -141,7 +141,7 @@ class MarketComponent extends React.Component {
         ));
         view = (
             <SafeAreaView style={marketStyles.container}>
-                <Text style={marketStyles.helper}>Чтобы купить акции компании, нажми на неё</Text>
+                <Text style={marketStyles.helper}>Чтобы купить акции компании, нажмите на неё</Text>
                 <ScrollView style={marketStyles.scrollView}>{companies}</ScrollView>
             </SafeAreaView>
         );

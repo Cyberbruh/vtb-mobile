@@ -1,4 +1,3 @@
-import { StatusBar } from "expo-status-bar";
 import React from "react";
 import {
     StyleSheet,
@@ -97,10 +96,12 @@ class App extends React.Component {
     }
 
     handleStart = () => {
-        if (this.state.age <= 0 || this.state.age > 150)
+        if (this.state.age <= 0 || this.state.age > 150) {
             Alert.alert("Неверный возраст", "Введите, пожалуйста, реальный возраст", [
                 { text: "OK" },
             ]);
+            return;
+        }
         (async () => {
             try {
                 this.setState(() => ({
@@ -129,7 +130,7 @@ class App extends React.Component {
                 );
                 Alert.alert(
                     "Обучение",
-                    "Вам предоставлен стартовый капитал 3500р. На странице новостей вы можете увидеть происходящие в мире события, они появляются каждые 10 секунд, после появления события у вас есть 10 секунд до обновления курса акций, вы должны предугадать куда сдвинется курс и у каких компаний. Рекомендуем сначала изучить компании.",
+                    "Вам предоставлен стартовый капитал 3500р. На странице новостей вы можете увидеть происходящие в мире события, они появляются каждые 13 секунд, после появления события у вас есть 13 секунд до обновления курса акций, вы должны предугадать куда сдвинется курс и у каких компаний. Рекомендуем сначала изучить компании. Независимо от новостей у всех компаний немного меняется курс.",
                     [{ text: "OK" }]
                 );
                 this.componentDidMount();
@@ -188,7 +189,7 @@ class App extends React.Component {
             }
         }
         for (let i of companies) {
-            i.rate *= 0.95 + 0.15 * Math.random();
+            i.rate *= 0.975 + 0.1 * Math.random();
         }
         this.setState(() => ({
             companies: companies,
@@ -234,7 +235,6 @@ class App extends React.Component {
                             color="#3A83F1"
                             accessibilityLabel="Начать играть"
                         />
-                        <StatusBar style="auto" />
                     </View>
                 </TouchableWithoutFeedback>
             );
