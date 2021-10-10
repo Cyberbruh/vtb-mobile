@@ -264,12 +264,13 @@ class App extends React.Component {
                                         return <IconMarket width="100%" height="100%" />;
                                     }
                                 },
-                                tabBarInactiveTintColor: "gray",
-                                tabBarActiveTintColor: "tomato",
+                                tabBarInactiveTintColor: "#14315C",
+                                tabBarActiveTintColor: "#3A83F1",
                                 header: ({ navigation, route, options }) => {
                                     const title = getHeaderTitle(options, route.name);
                                     return (
                                         <Header
+                                            containerStyle={styles.header}
                                             leftComponent={<IconVtb width="100%" height="15" />}
                                             centerComponent={{
                                                 text: title,
@@ -301,6 +302,9 @@ class App extends React.Component {
 }
 
 const styles = StyleSheet.create({
+    header: {
+        backgroundColor: "#3A83F1",
+    },
     picker: {
         marginVertical: 20,
     },

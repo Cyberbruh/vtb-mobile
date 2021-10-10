@@ -95,7 +95,7 @@ class CompanyComponent extends React.Component {
                                 height: 10,
                                 backgroundColor: "transparent",
                             }}
-                            thumbStyle={{ height: 25, width: 25, backgroundColor: "lightblue" }}
+                            thumbStyle={{ height: 25, width: 25, backgroundColor: "#3A83F1" }}
                         />
                         <Text style={companyStyles.inputLabel}>
                             {this.state.stockCount >= 0 ? "Купить " : "Продать "}
@@ -107,7 +107,7 @@ class CompanyComponent extends React.Component {
                             style={companyStyles.button}
                             onPress={this.checkStock}
                             title="Провести сделку"
-                            color="#841584"
+                            color="#3A83F1"
                         />
                     </View>
                 </View>
@@ -231,15 +231,15 @@ const marketStyles = StyleSheet.create({
     },
     company: {
         flexDirection: "row",
-        backgroundColor: "lightblue",
-        borderRadius: 10,
+        backgroundColor: "#A5D5FF",
+        borderRadius: 7,
         marginTop: 10,
     },
     image: {
         borderRadius: 50,
         height: 65,
         width: 65,
-        backgroundColor: "grey",
+        backgroundColor: "#3A83F1",
         margin: 12,
     },
     rightblock: {

@@ -37,7 +37,7 @@ class NewsScreen extends React.Component {
                 "У вас отлично получается!",
                 "Доверьте ваши финансы умным продуктам банка ВТБ, чтобы быть уверенным в их сохранности.",
                 [
-                    { text: "Перейти", onPress: () => Linking.openURL("https://www.vtb.ru/") },
+                    { text: "Перейти", onPress: () => Linking.openURL("https://broker.vtb.ru/") },
                     { text: "Остаться" },
                 ]
             );
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
     },
     event: {
-        backgroundColor: "lightblue",
+        backgroundColor: "#A5D5FF",
         borderRadius: 5,
         flexDirection: "row",
         padding: 10,
