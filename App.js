@@ -25,6 +25,7 @@ import Config from "./config.js";
 
 import IconMarket from "./assets/market.svg";
 import IconNews from "./assets/news.svg";
+import IconVtb from "./assets/logo.svg";
 import { MainContext } from "./components/context";
 
 const Tab = createBottomTabNavigator();
@@ -77,7 +78,10 @@ class App extends React.Component {
                         for (let i of companies) {
                             if (value.companies) {
                                 for (let j of value.companies) {
-                                    if (i.id == j.id) i.stock = j.stock;
+                                    if (i.id == j.id) {
+                                        i.stock = j.stock;
+                                        i.rate = j.rate;
+                                    }
                                 }
                             }
                         }
@@ -266,6 +270,7 @@ class App extends React.Component {
                                     const title = getHeaderTitle(options, route.name);
                                     return (
                                         <Header
+                                            leftComponent={<IconVtb width="100%" height="15" />}
                                             centerComponent={{
                                                 text: title,
                                                 style: { color: "#fff" },
