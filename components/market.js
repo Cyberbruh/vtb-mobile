@@ -240,7 +240,7 @@ const marketStyles = StyleSheet.create({
         height: 65,
         width: 65,
         backgroundColor: "grey",
-        margin: 15,
+        margin: 12,
     },
     rightblock: {
         flexDirection: "column",
@@ -259,7 +259,7 @@ const marketStyles = StyleSheet.create({
         justifyContent: "space-between",
         flex: 1,
         height: "100%",
-        paddingHorizontal: 15,
+        paddingHorizontal: 10,
     },
     name: {
         fontSize: 18,
